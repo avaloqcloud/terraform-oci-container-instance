@@ -32,3 +32,11 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+/.idea/.gitignore
+/acf_resource_container_instance.iml
+/.idea/checkstyle-idea.xml
+/.idea/google-java-format.xml
+/.idea/jpa-buddy.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
