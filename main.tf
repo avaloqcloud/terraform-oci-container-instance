@@ -1,52 +1,69 @@
-resource "oci_container_instances_container_instance" "this" {
+data "oci_identity_availability_domains" "local_ads" {
+  compartment_id = var.compartment_ocid
+}
+
+
+resource "oci_container_instances_container_instance" "container_instance" {
+  count = length(var.container_instance)
+
+  availability_domain = data.oci_identity_availability_domains.local_ads.availability_domains.0.name
   compartment_id      = var.compartment_ocid
-  display_name        = var.container_name
-  availability_domain = var.ad
-  shape               = "CI.Standard.E4.Flex"
+
+  display_name             = var.container_instance[count.index]["container_name"]
+  container_restart_policy = "ALWAYS"
+  shape                    = var.container_instance[count.index]["shape"]
   shape_config {
-    ocpus = var.shape_config_ocpus
+    memory_in_gbs = var.container_instance[count.index]["mem"]
+    ocpus         = var.container_instance[count.index]["cpu"]
   }
+
   vnics {
-    subnet_id = oci_core_subnet.test_subnet.id
+    subnet_id             = var.subnet_id
+    is_public_ip_assigned = true
   }
+
   containers {
-    display_name          = var.container_name
-    image_url             = var.container_image_url
-    environment_variables = var.env_variables
+    image_url    = var.container_instance[count.index]["container_image_url"]
+    display_name = var.container_instance[count.index]["container_name"]
+
+    environment_variables = var.container_instance[count.index]["env_variables"]
+
+    command   = try(var.container_instance[count.index]["command"], null)
+    arguments = try(var.container_instance[count.index]["arguments"], null)
+
+    dynamic "volume_mounts" {
+      for_each = var.container_instance[count.index]["volumes"]
+      content {
+        volume_name = volume_mounts.key
+        mount_path  = volume_mounts.value.path
+        sub_path    = try(volume_mounts.value.file_name, null)
+      }
+    }
+  }
+
+  dynamic "image_pull_secrets" {
+    for_each = var.image_pull_secrets
+    content {
+      registry_endpoint = image_pull_secrets.value.registry_endpoint
+      secret_type       = image_pull_secrets.value.secret_type
+
+      secret_id = try(image_pull_secrets.value.secret_id, null)
+      username  = base64encode(try(image_pull_secrets.value.username, null))
+      password  = base64encode(try(image_pull_secrets.value.password, null))
+    }
+  }
+
+  dynamic "volumes" {
+    for_each = var.container_instance[count.index]["volumes"]
+    content {
+      name          = volumes.key
+      volume_type   = volumes.value.volume_type
+      backing_store = try(volumes.value.backing_store, null)
+      configs {
+        data      = try(base64encode(volumes.value.data), null)
+        file_name = try(volumes.value.file_name, null)
+      }
+    }
   }
 }
 
-resource "oci_core_internet_gateway" "test_igw" {
-
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.test_vcn.id
-  display_name   = "test-vcn - Internet gateway"
-  enabled        = true
-}
-
-resource "oci_core_vcn" "test_vcn" {
-  cidr_blocks    = ["10.0.0.0/16"]
-  compartment_id = var.compartment_ocid
-  dns_label      = "TestDNS"
-}
-
-resource "oci_core_subnet" "test_subnet" {
-  cidr_block     = "10.0.0.0/24"
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.test_vcn.id
-  dns_label      = "TestSubnet"
-  route_table_id = oci_core_route_table.test_igw_rt.id
-}
-
-
-resource "oci_core_route_table" "test_igw_rt" {
-
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.test_vcn.id
-  display_name   = "test-vcn - Internet gateway route table"
-  route_rules {
-
-    network_entity_id = oci_core_internet_gateway.test_igw.id
-    destination       = "0.0.0.0/0"
-  }
-}
