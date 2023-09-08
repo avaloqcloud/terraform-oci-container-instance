@@ -1,8 +1,3 @@
-provider "oci" {
-#  auth = "APIKey"
-  region = var.region
-}
-
 terraform {
   required_version = ">= 1.0.0"
   required_providers {
@@ -12,3 +7,4 @@ terraform {
     }
   }
 }
+
