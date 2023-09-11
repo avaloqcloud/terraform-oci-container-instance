@@ -36,7 +36,6 @@ resource "oci_container_instances_container_instance" "container_instance" {
       content {
         volume_name = volume_mounts.key
         mount_path  = volume_mounts.value.path
-        sub_path    = try(volume_mounts.value.file_name, null)
       }
     }
   }
@@ -59,11 +58,13 @@ resource "oci_container_instances_container_instance" "container_instance" {
       name          = volumes.key
       volume_type   = volumes.value.volume_type
       backing_store = try(volumes.value.backing_store, null)
-      configs {
-        data      = try(base64encode(volumes.value.data), null)
-        file_name = try(volumes.value.file_name, null)
+      dynamic "configs" {
+        for_each = try(volumes.value.configs, {})
+        content {
+          data      = try(configs.value, null)
+          file_name = try(configs.key, null)
+        }
       }
     }
   }
 }
-
