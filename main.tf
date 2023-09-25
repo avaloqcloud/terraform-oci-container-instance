@@ -38,6 +38,18 @@ resource "oci_container_instances_container_instance" "container_instance" {
         mount_path  = volume_mounts.value.path
       }
     }
+
+    resource_config {
+      memory_limit_in_gbs = try(var.container_instance[count.index]["memory_limit"], null)
+    }
+
+    security_context {
+      run_as_group          = try(var.container_instance[count.index]["run_as_group"], null)
+      run_as_user           = try(var.container_instance[count.index]["run_as_user"], null)
+      security_context_type = "LINUX"
+    }
+
+    working_directory = try(var.container_instance[count.index]["working_directory"], null)
   }
 
   dynamic "image_pull_secrets" {
