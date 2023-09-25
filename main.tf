@@ -19,7 +19,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
 
   vnics {
     subnet_id             = var.subnet_id
-    is_public_ip_assigned = true
+    is_public_ip_assigned = false
   }
 
   containers {
