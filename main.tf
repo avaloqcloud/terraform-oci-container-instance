@@ -32,7 +32,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
     arguments = try(var.container_instance[count.index]["arguments"], null)
 
     dynamic "volume_mounts" {
-      for_each = var.container_instance[count.index]["volumes"]
+      for_each = try(var.container_instance[count.index]["volumes"], {})
       content {
         volume_name = volume_mounts.key
         mount_path  = volume_mounts.value.path
@@ -53,7 +53,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
   }
 
   dynamic "image_pull_secrets" {
-    for_each = var.image_pull_secrets
+    for_each = try(var.image_pull_secrets, {})
     content {
       registry_endpoint = image_pull_secrets.value.registry_endpoint
       secret_type       = image_pull_secrets.value.secret_type
@@ -65,7 +65,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
   }
 
   dynamic "volumes" {
-    for_each = var.container_instance[count.index]["volumes"]
+    for_each = try(var.container_instance[count.index]["volumes"], {})
     content {
       name          = volumes.key
       volume_type   = volumes.value.volume_type

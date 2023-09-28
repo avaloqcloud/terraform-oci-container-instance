@@ -12,5 +12,5 @@ variable "container_instance" {}
 
 variable "image_pull_secrets" {
   type    = map(any)
-  default = null
+  default = {}
 }
