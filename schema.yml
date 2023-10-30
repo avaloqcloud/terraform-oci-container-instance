@@ -1,0 +1,81 @@
+title: "Container Instance Creation"
+description: "Container Instance Creation on OCI"
+outputGroups:
+  - title: "Container Instance"
+schemaVersion: 1.1.0
+locale: "en"
+variableGroups:
+  - title: "OCI (Oracle Cloud Infrastructure) details"
+    variables:
+      - compartment_ocid
+      - availability_domain
+      - subnet_id
+
+  - title: "Container Instance configuration details"
+    variables:
+      - display_name
+      - shape
+      - container_restart_policy
+      - memory_in_gbs
+      - ocpus
+      - containers
+      - volumes
+      - image_pull_secrets
+
+variables:
+  compartment_ocid:
+    type: string
+    required: true
+    description: "The OCID of the compartment."
+    title: "Compartment OCID"
+  availability_domain:
+    type: string
+    required: true
+    visible: complexExpression
+  subnet_id:
+    type: string
+    title: "Subnet ID"
+    description: "The OCID of the subnet to create the VNIC in."
+    required: true
+  display_name:
+    type: string
+    pattern: "^[a-z-]+$"
+    title: "Display Name"
+    description: "A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. If you don't provide a name, a name is generated automatically."
+    required: true
+  shape:
+    type: string
+    title: "Shape"
+    description: "The shape of the container instance. The shape determines the resources available to the container instance."
+    required: true
+  container_restart_policy:
+    type: string
+    pattern: "^(ALWAYS|NEVER|ON_FAILURE)$"
+    title: "Container Restart Policy"
+    description: "The container restart policy is applied for all containers in container instance."
+    required: true
+  memory_in_gbs:
+    type: number
+    title: "Memory in GBs"
+    description: "The total amount of memory available to the container instance, in gigabytes."
+    required: true
+  ocpus:
+    type: number
+    title: "OCPUs"
+    description: "The total number of OCPUs available to the container instance."
+    required: true
+  containers:
+    type: list(map)
+    title: "Containers"
+    description: "The containers to create on this container instance."
+    required: true
+  volumes:
+    type: list(map)
+    title: "Volumes"
+    description: "A volume is a directory with data that is accessible across multiple containers in a container instance."
+    required: false
+  image_pull_secrets:
+    type: list(map)
+    title: "Image Pull Secrets"
+    description: "The image pulls secrets so you can access private registry to pull container images."
+    required: false

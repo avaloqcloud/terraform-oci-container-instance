@@ -1,82 +1,74 @@
-data "oci_identity_availability_domains" "local_ads" {
-  compartment_id = var.compartment_ocid
-}
-
-
 resource "oci_container_instances_container_instance" "container_instance" {
-  count = length(var.container_instance)
 
-  availability_domain = data.oci_identity_availability_domains.local_ads.availability_domains.0.name
-  compartment_id      = var.compartment_ocid
+    availability_domain = var.availability_domain
+    compartment_id      = var.compartment_ocid
 
-  display_name             = var.container_instance[count.index]["container_name"]
-  container_restart_policy = "ALWAYS"
-  shape                    = var.container_instance[count.index]["shape"]
-  shape_config {
-    memory_in_gbs = var.container_instance[count.index]["mem"]
-    ocpus         = var.container_instance[count.index]["cpu"]
-  }
-
-  vnics {
-    subnet_id             = var.subnet_id
-    is_public_ip_assigned = false
-  }
-
-  containers {
-    image_url    = var.container_instance[count.index]["container_image_url"]
-    display_name = var.container_instance[count.index]["container_name"]
-
-    environment_variables = var.container_instance[count.index]["env_variables"]
-
-    command   = try(var.container_instance[count.index]["command"], null)
-    arguments = try(var.container_instance[count.index]["arguments"], null)
-
-    dynamic "volume_mounts" {
-      for_each = try(var.container_instance[count.index]["volumes"], {})
-      content {
-        volume_name = volume_mounts.key
-        mount_path  = volume_mounts.value.path
-      }
+    display_name             = var.display_name
+    container_restart_policy = var.container_restart_policy
+    shape                    = var.shape
+    shape_config {
+        memory_in_gbs = var.memory_in_gbs
+        ocpus         = var.ocpus
     }
 
-    resource_config {
-      memory_limit_in_gbs = try(var.container_instance[count.index]["memory_limit"], null)
+    vnics {
+        subnet_id             = var.subnet_id
+        is_public_ip_assigned = false
+        hostname_label        = var.display_name
     }
 
-    security_context {
-      run_as_group          = try(var.container_instance[count.index]["run_as_group"], null)
-      run_as_user           = try(var.container_instance[count.index]["run_as_user"], null)
-      security_context_type = "LINUX"
-    }
-
-    working_directory = try(var.container_instance[count.index]["working_directory"], null)
-  }
-
-  dynamic "image_pull_secrets" {
-    for_each = try(var.image_pull_secrets, {})
-    content {
-      registry_endpoint = image_pull_secrets.value.registry_endpoint
-      secret_type       = image_pull_secrets.value.secret_type
-
-      secret_id = try(image_pull_secrets.value.secret_id, null)
-      username  = base64encode(try(image_pull_secrets.value.username, null))
-      password  = base64encode(try(image_pull_secrets.value.password, null))
-    }
-  }
-
-  dynamic "volumes" {
-    for_each = try(var.container_instance[count.index]["volumes"], {})
-    content {
-      name          = volumes.key
-      volume_type   = volumes.value.volume_type
-      backing_store = try(volumes.value.backing_store, null)
-      dynamic "configs" {
-        for_each = try(volumes.value.configs, {})
+    dynamic "containers" {
+        for_each = var.containers
         content {
-          data      = try(configs.value, null)
-          file_name = try(configs.key, null)
+            display_name          = containers.value.display_name
+            image_url             = containers.value.image_url
+            environment_variables = try(containers.value.environment_variables, null)
+
+            command               = try(containers.value.command, null)
+            arguments             = try(containers.value.arguments, null)
+
+            dynamic "volume_mounts" {
+                for_each = containers.value.volume_mounts == null ? [] : containers.value.volume_mounts
+                content {
+                    volume_name = volume_mounts.value.volume_name
+                    mount_path  = volume_mounts.value.mount_path
+                }
+            }
+
+            resource_config {
+                memory_limit_in_gbs = try(containers.value.memory_limit_in_gbs, null)
+                vcpus_limit         = try(containers.value.vcpus_limit, null)
+            }
+            
+            working_directory     = try(containers.value.working_directory, null)
         }
-      }
     }
-  }
+
+    dynamic "volumes" {
+        for_each = var.volumes
+        content {
+            name        = volumes.value.name
+            volume_type = volumes.value.volume_type
+
+            dynamic "configs" {
+                for_each = try(volumes.value.configs, [])
+                content {
+                    data      = configs.value.data
+                    file_name = configs.value.file_name
+                }
+            }
+        }
+    }
+
+    dynamic "image_pull_secrets" {
+        for_each = var.image_pull_secrets
+        content {
+            registry_endpoint = image_pull_secrets.value.registry_endpoint
+            secret_type       = image_pull_secrets.value.secret_type
+
+            secret_id = try(image_pull_secrets.value.secret_id, null)
+            username  = base64encode(try(image_pull_secrets.value.username, null))
+            password  = base64encode(try(image_pull_secrets.value.password, null))
+        }
+    }
 }
