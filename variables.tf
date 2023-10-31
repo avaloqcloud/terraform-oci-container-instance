@@ -10,10 +10,11 @@ variable "availability_domain" {
 
 variable "display_name" {
     type        = string
+    default     = null
     description = "A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. If you don't provide a name, a name is generated automatically."
 
     validation {
-        condition     = can(regex("^[a-z0-9-]+$", var.display_name))
+        condition     = var.display_name == null || can(regex("^[a-z0-9-]+$", var.display_name))
         error_message = "The display_name must contain only letters, numbers or a dash"
     }
 }
@@ -23,8 +24,14 @@ variable "shape" {
     description = "The shape of the container instance. The shape determines the resources available to the container instance."
 }
 
+variable "hostname_label" {
+    type        = string
+    default     = null
+    description = "The hostname (DNS) name of the container instance."
+}
+
 variable "subnet_id" {
-    type    = string
+    type        = string
     description = "The OCID of the subnet to create the VNIC in."
 }
 
@@ -51,7 +58,7 @@ variable "ocpus" {
 
 variable "containers" {
     type = list(object({
-        display_name          = string
+        display_name          = optional(string)
         image_url             = string
         environment_variables = optional(map(string))
 
@@ -90,7 +97,7 @@ variable "volumes" {
     }))
 
     description = "A volume is a directory with data that is accessible across multiple containers in a container instance."
-    default = []
+    default     = []
 }
 
 variable "image_pull_secrets" {
@@ -103,5 +110,5 @@ variable "image_pull_secrets" {
     })))
 
     description = "The image pulls secrets so you can access private registry to pull container images."
-    default = []
+    default     = []
 }
