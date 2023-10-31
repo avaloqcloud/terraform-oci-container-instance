@@ -9,6 +9,11 @@ variableGroups:
     variables:
       - compartment_ocid
       - availability_domain
+
+  - title: "Container Instance network configuration details"
+    variables:
+      - vcn_compartment
+      - vcn_id
       - subnet_id
 
   - title: "Container Instance configuration details"
@@ -16,6 +21,7 @@ variableGroups:
       - display_name
       - shape
       - container_restart_policy
+      - hostname_label
       - memory_in_gbs
       - ocpus
       - containers
@@ -24,36 +30,61 @@ variableGroups:
 
 variables:
   compartment_ocid:
-    type: string
+    type: oci:identity:compartment:id
+    default: ${compartment_ocid}
     required: true
     description: "The OCID of the compartment."
     title: "Compartment OCID"
   availability_domain:
-    type: string
+    type: oci:identity:availabilitydomain:name
     required: true
+    dependsOn:
+      compartmentId: ${compartment_ocid}
     visible: complexExpression
+  vcn_compartment:
+    type: oci:identity:compartment:id
+    title: "VCN compartment"
+    default: ${compartment_ocid}
+    required: true
+  vcn_id:
+    type: oci:core:vcn:id
+    title: "VCN ID"
+    default: ''
+    required: true
+    dependsOn:
+      compartmentId: ${vcn_compartment}
   subnet_id:
-    type: string
+    type: oci:core:subnet:id
     title: "Subnet ID"
-    description: "The OCID of the subnet to create the VNIC in."
+    dependsOn:
+      compartmentId: ${vcn_compartment}
+      vcnId: ${vcn_id}
     required: true
   display_name:
     type: string
-    pattern: "^[a-z-]+$"
     title: "Display Name"
     description: "A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information. If you don't provide a name, a name is generated automatically."
-    required: true
+    required: false
   shape:
     type: string
     title: "Shape"
+    default: "CI.Standard.E4.Flex"
     description: "The shape of the container instance. The shape determines the resources available to the container instance."
     required: true
   container_restart_policy:
-    type: string
-    pattern: "^(ALWAYS|NEVER|ON_FAILURE)$"
+    type: enum
+    enum:
+      - ALWAYS
+      - NEVER
+      - ON_FAILURE
     title: "Container Restart Policy"
     description: "The container restart policy is applied for all containers in container instance."
     required: true
+  hostname_label:
+    type: string
+    title: "Hostname Label"
+    description: "The hostname (DNS) name of the container instance."
+    required: false
   memory_in_gbs:
     type: number
     title: "Memory in GBs"
