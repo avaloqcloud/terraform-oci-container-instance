@@ -1,5 +1,7 @@
 [![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/resourcemanager/stacks/create?zipUrl=https://github.com/avaloqcloud/terraform-oci-container-instance/archive/refs/tags/v0.1.0.zip)
 
+[![Generate terraform docs](https://github.com/avaloqcloud/terraform-oci-container-instance/actions/workflows/documentation.yml/badge.svg)](https://github.com/avaloqcloud/terraform-oci-container-instance/actions/workflows/documentation.yml)
+
 ## Terraform OCI Container Instance
 The code provides a reusable Terraform module that provisions a container instance on Oracle Cloud Infrastructure.
 
