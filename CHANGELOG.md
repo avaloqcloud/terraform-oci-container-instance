@@ -4,6 +4,7 @@
 ## [Unreleased]
 ### Added
 - Variable `hostname_label`
+- Variable `backing_store` in `volumes` block
 - Network configuration to `schema.yml` file
 ### Changed
 ### Fixed
