@@ -47,8 +47,9 @@ resource "oci_container_instances_container_instance" "container_instance" {
     dynamic "volumes" {
         for_each = var.volumes
         content {
-            name        = volumes.value.name
-            volume_type = volumes.value.volume_type
+            name          = volumes.value.name
+            volume_type   = volumes.value.volume_type
+            backing_store = try(volumes.value.backing_store, null)
 
             dynamic "configs" {
                 for_each = try(volumes.value.configs, [])
