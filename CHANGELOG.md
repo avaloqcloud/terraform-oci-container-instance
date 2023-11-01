@@ -10,4 +10,5 @@
 ### Fixed
 - Variable `display_name` is required
 - Variable `image_pull_secrets` requires a map
+- The code fails when `configs` block is not set
 

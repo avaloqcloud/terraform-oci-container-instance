@@ -52,7 +52,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
             backing_store = try(volumes.value.backing_store, null)
 
             dynamic "configs" {
-                for_each = try(volumes.value.configs, [])
+                for_each = volumes.value.configs == null ? [] : volumes.value.configs
                 content {
                     data      = configs.value.data
                     file_name = configs.value.file_name
