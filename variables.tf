@@ -101,13 +101,13 @@ variable "volumes" {
 }
 
 variable "image_pull_secrets" {
-    type = list(map(object({
+    type = list(object({
         registry_endpoint = string
         secret_type       = string
         secret_id         = optional(string)
         username          = optional(string)
         password          = optional(string)
-    })))
+    }))
 
     description = "The image pulls secrets so you can access private registry to pull container images."
     default     = []
