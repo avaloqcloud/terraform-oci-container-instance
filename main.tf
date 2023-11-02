@@ -1,7 +1,7 @@
 resource "oci_container_instances_container_instance" "container_instance" {
 
-    availability_domain = var.availability_domain
-    compartment_id      = var.compartment_ocid
+    availability_domain      = var.availability_domain
+    compartment_id           = var.compartment_ocid
 
     display_name             = try(var.display_name, null)
     container_restart_policy = var.container_restart_policy
@@ -40,7 +40,7 @@ resource "oci_container_instances_container_instance" "container_instance" {
                 vcpus_limit         = try(containers.value.vcpus_limit, null)
             }
 
-            working_directory     = try(containers.value.working_directory, null)
+            working_directory       = try(containers.value.working_directory, null)
         }
     }
 

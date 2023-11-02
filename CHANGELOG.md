@@ -3,6 +3,7 @@
 
 ## [Unreleased]
 ### Added
+- 'CODEOWNERS' file
 - Variable `hostname_label`
 - Variable `backing_store` in `volumes` block
 - Network configuration to `schema.yml` file
