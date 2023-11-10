@@ -15,7 +15,7 @@ variable "display_name" {
 
     validation {
         condition     = var.display_name == null || can(regex("^[a-z0-9-]+$", var.display_name))
-        error_message = "The display_name must contain only letters, numbers or a dash"
+        error_message = "The display_name must contain only letters, numbers or a dash."
     }
 }
 
@@ -42,7 +42,7 @@ variable "container_restart_policy" {
 
     validation {
         condition     = var.container_restart_policy != "NEVER" || var.container_restart_policy != "ALWAYS" || var.container_restart_policy != "ON_FAILURE"
-        error_message = "The container_restart_policy value must be \"ALWAYS\",  \"NEVER\" or \"ON_FAILURE\""
+        error_message = "The container_restart_policy value must be \"ALWAYS\",  \"NEVER\" or \"ON_FAILURE\"."
     }
 }
 
