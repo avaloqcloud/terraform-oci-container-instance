@@ -35,6 +35,7 @@ variables:
     required: true
     description: "The OCID of the compartment."
     title: "Compartment OCID"
+    myCustomKey: avq:compartment:id
   availability_domain:
     type: oci:identity:availabilitydomain:name
     required: true
