@@ -1,4 +1,5 @@
 variable "container_instance" {
+    description = "Container instance variable object"
     type = object({
         compartment_ocid         = string
         container_instance_id    = optional(string) # Required for lookup
@@ -52,7 +53,6 @@ variable "container_instance" {
         })))
     })
 
-    description = "Container Instance input object."
 
     validation {
         condition     = contains([

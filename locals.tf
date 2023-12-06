@@ -1,8 +1,8 @@
 locals {
-    helper_resource_map = {
-        "resource" = {
-            container_instance_id    = var.container_instance.container_instance_id != null ? var.container_instance.container_instance_id : null
-            compartment_ocid         = var.container_instance.compartment_ocid
+    
+    potential_resource = length(data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items) < 1 ? {
+	"resource" = {
+	    compartment_ocid         = var.container_instance.compartment_ocid
             availability_domain      = var.container_instance.availability_domain
             display_name             = var.container_instance.display_name
             shape                    = var.container_instance.shape
@@ -14,29 +14,25 @@ locals {
             containers               = var.container_instance.containers
             volumes                  = var.container_instance.volumes
             image_pull_secrets       = var.container_instance.image_pull_secrets
+	} 
+    } : {}
+
+    pre_existing_output_container_instance = length(data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items) > 0 ? {
+      	"resource" = {
+      	    compartment_ocid         = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].compartment_id
+            availability_domain      = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].availability_domain                              
+            display_name             = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].display_name
+            shape                    = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].shape
+            #hostname_label           = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].hostname_label
+            #subnet_id                = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].subnet_id
+            container_restart_policy = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].container_restart_policy
+            #memory_in_gbs            = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].shape_config.memory_in_gbs
+            #ocpus                    = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].shape_config.ocpus
+            containers               = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].containers
+            volumes                  = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].volumes
+            image_pull_secrets       = data.oci_container_instances_container_instances.existing_resource.container_instance_collection[0].items[0].image_pull_secrets
         }
-    }
+    } : {}
 
-    potential_resource = length(data.oci_container_instances_container_instance.existing_resource) < 1 ? var.container_instance != null ? {
-        for flat_container_instance in flatten([
-            for k, v in local.helper_resource_map : {
-                container_instance_id    = null
-                k                        = k
-                compartment_ocid         = v.compartment_ocid
-                availability_domain      = v.availability_domain
-                display_name             = v.display_name
-                shape                    = v.shape
-                hostname_label           = v.hostname_label
-                subnet_id                = v.subnet_id
-                container_restart_policy = v.container_restart_policy
-                memory_in_gbs            = v.memory_in_gbs
-                ocpus                    = v.ocpus
-                containers               = v.containers
-                volumes                  = v.volumes
-                image_pull_secrets       = v.image_pull_secrets
-            }
-        ]) : flat_container_instance.k => flat_container_instance
-    } : {} : {}
-
-    output_container_instance = merge(oci_container_instances_container_instance.this, data.oci_container_instances_container_instance.existing_resource)
+    output_container_instance = merge(oci_container_instances_container_instance.this, local.pre_existing_output_container_instance)
 }
