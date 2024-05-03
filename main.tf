@@ -68,8 +68,8 @@ resource "oci_container_instances_container_instance" "container_instance" {
             secret_type       = image_pull_secrets.value.secret_type
 
             secret_id = try(image_pull_secrets.value.secret_id, null)
-            username  = base64encode(try(image_pull_secrets.value.username, null))
-            password  = base64encode(try(image_pull_secrets.value.password, null))
+            username  = try(base64encode(image_pull_secrets.value.username, null))
+            password  = try(base64encode(image_pull_secrets.value.password, null))
         }
     }
 }
